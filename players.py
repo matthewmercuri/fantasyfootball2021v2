@@ -18,6 +18,3 @@ class Players:
             return cls._pfr_players()
         else:
             raise ValueError(f"{source} is not a valid source.")
-
-
-Players.get_players_meta_df()
