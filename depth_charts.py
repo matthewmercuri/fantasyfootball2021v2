@@ -36,6 +36,3 @@ class DepthCharts:
         df = df[NEEDED_COLUMNS]
 
         return df
-
-
-DepthCharts.get_depth_charts()

@@ -85,7 +85,7 @@ class Data:
 
     @classmethod
     def get_pfr_fantasy_totals_df(
-        cls, year: str = "2020", aggregate: bool = False
+        cls, year: str = "2020", aggregate: bool = False, save: bool = False
     ) -> pd.DataFrame:
 
         if aggregate is False:
@@ -94,7 +94,10 @@ class Data:
             )[0]
             df = cls._clean_pfr_fantasy_totals_df(_df)
             df = cls._add_pfr_fantasy_totals_df(df)
-            return df
+
+            if save is True:
+                df.to_csv(f"data/{year}fantasytable.csv")
+
         else:
             dfs = []
             for _year in cls.VALID_YEARS:
@@ -106,7 +109,8 @@ class Data:
                 dfs.append(df)
 
             df = pd.concat(dfs)
-            return df
+
+        return df
 
     @classmethod
     def get_pfr_players_meta_dict(
