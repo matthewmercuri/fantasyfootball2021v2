@@ -104,6 +104,7 @@ class Features:
             self._add_position_factor_cols, axis=1, position_stats=position_stats
         )
 
-        print(position_stats)
-
         return self.df
+
+    def save_df(self):
+        self.df.to_csv("data/features.csv")

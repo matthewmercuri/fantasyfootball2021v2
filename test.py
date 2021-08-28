@@ -7,4 +7,6 @@ from features import Features
 # Utils.check_good_data_pfr()
 Features = Features()
 # Features._get_position_stats()
-print(Features.add_value_over_position())
+# print(Features.add_value_over_position())
+Features.add_value_over_position()
+Features.save_df()
