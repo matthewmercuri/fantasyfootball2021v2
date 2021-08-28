@@ -19,5 +19,6 @@ class Utils:
                 no_data.append(draftee)
 
         print(no_data)
+        print(len(no_data))
 
         return no_data

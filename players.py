@@ -27,6 +27,17 @@ class Players:
         if source == "SCORE":
             df = pd.read_csv("meta_data/2021draftees_thescore.csv")
             df["Player"] = df["Player"].apply(lambda x: x.strip().upper())
+            name_overrides = {
+                "ALLEN ROBINSON II": "ALLEN ROBINSON",
+                "PATRICK MAHOMES II": "PATRICK MAHOMES",
+                "WILL FULLER V": "WILL FULLER",
+                "MARVIN JONES JR.": "MARVIN JONES",
+                "D.J. CHARK JR.": "DJ CHARK",
+                "MELVIN GORDON III": "MELVIN GORDON",
+                "TONY JONES JR.": "TONY JONES",
+            }
+            df["Player"] = df["Player"].replace(name_overrides)
+
         else:
             raise ValueError(f"{source} is not a valid source.")
 
