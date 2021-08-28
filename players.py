@@ -38,6 +38,8 @@ class Players:
             }
             df["Player"] = df["Player"].replace(name_overrides)
 
+            df.rename(columns={"Rk": "Score_Rank"}, inplace=True)
+
         else:
             raise ValueError(f"{source} is not a valid source.")
 

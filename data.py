@@ -89,6 +89,9 @@ class Data:
     ) -> pd.DataFrame:
 
         if aggregate is False:
+            if year not in cls.VALID_YEARS:
+                raise ValueError(f"{year} is not a valid year.")
+
             _df = pd.read_html(
                 cls.FANTASY_BASE_URL + f"{year}/fantasy.htm", index_col=0
             )[0]
@@ -109,6 +112,9 @@ class Data:
                 dfs.append(df)
 
             df = pd.concat(dfs)
+
+            if save is True:
+                df.to_csv("data/aggfantasytable.csv")
 
         return df
 
