@@ -146,6 +146,3 @@ class Data:
                 errors.append(e)
 
         return player_meta, errors
-
-
-print(Data.get_pfr_fantasy_totals_df(aggregate=True))

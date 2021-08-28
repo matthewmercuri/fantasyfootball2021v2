@@ -18,3 +18,16 @@ class Players:
             return cls._pfr_players()
         else:
             raise ValueError(f"{source} is not a valid source.")
+
+    @classmethod
+    def draft_eligible_players(cls, source: str = "SCORE") -> pd.DataFrame:
+        """returns a dataframe of draft eligibles sorted by the source's rank opinion"""
+        source = source.strip().upper()
+
+        if source == "SCORE":
+            df = pd.read_csv("meta_data/2021draftees_thescore.csv")
+            df["Player"] = df["Player"].apply(lambda x: x.strip().upper())
+        else:
+            raise ValueError(f"{source} is not a valid source.")
+
+        return df
