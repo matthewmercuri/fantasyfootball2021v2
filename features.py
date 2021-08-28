@@ -32,7 +32,17 @@ class Features:
         else:
             return -1000
 
-    def _get_positio_stats(self):
+    def _add_position_factor_cols(self, x, position_stats):
+        position = x["Pos."].strip().upper()
+        vop = x["ValueOverPosition_2020"]
+        factor = position_stats[position]["factor"]
+
+        if vop != 0:
+            return round(factor * vop, 2)
+        else:
+            return -1000
+
+    def _get_position_stats(self):
         position_stats = {}
 
         qbs = self.base_aggregate_df[self.base_aggregate_df["FantPos"] == "QB"]
@@ -64,10 +74,25 @@ class Features:
             "std": tes["FantPtPerGame"].std(),
         }
 
+        position_stats["QB"]["factor"] = (
+            (position_stats["QB"]["std"] / position_stats["QB"]["mean"]) ** 2
+        ) + 1
+
+        position_stats["RB"]["factor"] = (
+            (position_stats["RB"]["std"] / position_stats["RB"]["mean"]) ** 2
+        ) + 1
+
+        position_stats["TE"]["factor"] = (
+            (position_stats["TE"]["std"] / position_stats["TE"]["mean"]) ** 2
+        ) + 1
+        position_stats["WR"]["factor"] = (
+            (position_stats["WR"]["std"] / position_stats["WR"]["mean"]) ** 2
+        ) + 1
+
         return position_stats
 
     def add_value_over_position(self):
-        position_stats = self._get_positio_stats()
+        position_stats = self._get_position_stats()
 
         self.df["FantPtPerGame_2020"] = self.df.apply(
             self._get_player_fantptpergame, axis=1
@@ -75,5 +100,10 @@ class Features:
         self.df["ValueOverPosition_2020"] = self.df.apply(
             self._add_value_over_position_cols, axis=1, position_stats=position_stats
         )
+        self.df["VOP_2020_WithFactor"] = self.df.apply(
+            self._add_position_factor_cols, axis=1, position_stats=position_stats
+        )
+
+        print(position_stats)
 
         return self.df
