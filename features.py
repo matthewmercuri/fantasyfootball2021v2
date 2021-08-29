@@ -1,18 +1,34 @@
 import pandas as pd
 
 from data import Data
+from depth_charts import DepthCharts
 from players import Players
 
 
 class Features:
     """Assembling a dataframe of all relevant features to draft or feed into ML"""
 
+    VALID_POSITIONS = ["QB", "RB", "WR", "TE", "K", "DEF"]
+
     def __init__(self, draft_list_source: str = "SCORE"):
         self.base_df = Data.get_pfr_fantasy_totals_df()
         self.base_aggregate_df = Data.get_pfr_fantasy_totals_df(aggregate=True)
         self.draftees = Players.draft_eligible_players(draft_list_source)
+        self.depth_df = DepthCharts.get_depth_charts()
+        self.team_name_dict = self._get_team_dict()
 
         self.df = self.draftees
+
+    def _get_team_dict(self):
+        _team_dict = pd.read_csv("meta_data/team_names.csv", index_col=0).to_dict(
+            orient="index"
+        )
+        team_dict = {}
+        for x in _team_dict:
+            short = _team_dict[x]["SHORT"]
+            team_dict[short] = x
+
+        return team_dict
 
     def _get_player_fantptpergame(self, x):
         try:
@@ -41,6 +57,31 @@ class Features:
             return round(factor * vop, 2)
         else:
             return -1000
+
+    def _add_depth_cols(self, x):
+        position = x["Pos."].strip().upper()
+        team = x["Team"].strip().upper()
+        full_team = self.team_name_dict[team]
+
+        if position != "WR":
+            depth_row = self.depth_df[position].loc[full_team]
+            for count, player in enumerate(depth_row):
+                if player == x["Player"]:
+                    return f"{position}{count+1}"
+
+        else:
+            lwr_depth_row = self.depth_df["LWR"].loc[full_team]
+            for count, player in enumerate(lwr_depth_row):
+                if player == x["Player"]:
+                    return f"{'LWR'}{count+1}"
+            rwr_depth_row = self.depth_df["RWR"].loc[full_team]
+            for count, player in enumerate(rwr_depth_row):
+                if player == x["Player"]:
+                    return f"{'RWR'}{count+1}"
+            swr_depth_row = self.depth_df["SWR"].loc[full_team]
+            for count, player in enumerate(swr_depth_row):
+                if player == x["Player"]:
+                    return f"{'SWR'}{count+1}"
 
     def _get_position_stats(self):
         position_stats = {}
@@ -106,5 +147,16 @@ class Features:
 
         return self.df
 
+    def add_depth(self):
+        self.df["Depth"] = self.df.apply(self._add_depth_cols, axis=1)
+        return self.df
+
     def save_df(self):
         self.df.to_csv("data/features.csv")
+
+    def get_features_df_by_pos(self, position: str) -> pd.DataFrame:
+        position = position.strip().upper()
+        if position not in self.VALID_POSITIONS:
+            raise NameError(f"{position} is not a valid position")
+
+        return self.df[self.df["Pos."] == position]
