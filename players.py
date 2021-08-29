@@ -1,3 +1,4 @@
+from pandas.io.parsers import read_csv
 from data import Data
 
 import pandas as pd

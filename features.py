@@ -15,9 +15,15 @@ class Features:
         self.base_aggregate_df = Data.get_pfr_fantasy_totals_df(aggregate=True)
         self.draftees = Players.draft_eligible_players(draft_list_source)
         self.depth_df = DepthCharts.get_depth_charts()
+        self.fp_df = self._get_fant_pros_df()
         self.team_name_dict = self._get_team_dict()
 
         self.df = self.draftees
+
+    def _get_fant_pros_df(self):
+        df = pd.read_csv("meta_data/FantasyPros_2021_Draft_ALL_Rankings.csv")
+        df["PLAYER NAME"] = df["PLAYER NAME"].apply(lambda x: x.strip().upper())
+        return df
 
     def _get_team_dict(self):
         _team_dict = pd.read_csv("meta_data/team_names.csv", index_col=0).to_dict(
@@ -82,6 +88,26 @@ class Features:
             for count, player in enumerate(swr_depth_row):
                 if player == x["Player"]:
                     return f"{'SWR'}{count+1}"
+
+    def _add_fantasy_pros_rank_col(self, x):
+        player = x["Player"]
+        df = self.fp_df[self.fp_df["PLAYER NAME"] == player]
+        values = list(df["RK"].values)
+
+        if len(values) != 0:
+            return values[0]
+        else:
+            return ""
+
+    def _add_fantasy_pros_posrank_col(self, x):
+        player = x["Player"]
+        df = self.fp_df[self.fp_df["PLAYER NAME"] == player]
+        values = list(df["POS"].values)
+
+        if len(values) != 0:
+            return values[0]
+        else:
+            return ""
 
     def _get_position_stats(self):
         position_stats = {}
@@ -149,6 +175,14 @@ class Features:
 
     def add_depth(self):
         self.df["Depth"] = self.df.apply(self._add_depth_cols, axis=1)
+        return self.df
+
+    def add_fantasy_pros(self):
+        self.df["FP_Pos_Rank"] = self.df.apply(
+            self._add_fantasy_pros_posrank_col, axis=1
+        )
+
+        self.df["FP_OVR_Rank"] = self.df.apply(self._add_fantasy_pros_rank_col, axis=1)
         return self.df
 
     def save_df(self):
