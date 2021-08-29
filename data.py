@@ -75,7 +75,7 @@ class Data:
     def _add_pfr_fantasy_totals_df(
         cls, df: pd.DataFrame, year: str = None
     ) -> pd.DataFrame:
-        df["FantPtPerGame"] = df["Fantasy_FantPt"] / df["Games_G"]
+        df["FantPtPerGame"] = round(df["Fantasy_FantPt"] / df["Games_G"], 2)
         df["FantPtPerGame"] = df["FantPtPerGame"].apply(lambda x: 0 if x > 30 else x)
         df["FantPtPerGame"] = df["FantPtPerGame"].apply(lambda x: 0 if x < 0 else x)
 
